@@ -25,7 +25,8 @@ services:
       /bin/sh -c "
         ollama serve &
         sleep 10 &&
-        ollama pull qwen:0.5b &&
+        ollama pull deepseek-r1:latest &&
+        ollama pull nomic-embed-text &&
         wait
       "
 

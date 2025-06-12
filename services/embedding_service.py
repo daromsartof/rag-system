@@ -18,7 +18,7 @@ class EmbeddingService:
         chunks = self.document_service.split_documents(documents)
         db = self.chroma.getDb()
 
-        chunks_with_sids = self.document_service.calculate_chunk_ids(chunks)
+        chunks_with_ids = self.document_service.calculate_chunk_ids(chunks)
 
         existing_items = db.get(include=[])
         existing_ids = set(existing_items["ids"])

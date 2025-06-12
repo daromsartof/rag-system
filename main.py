@@ -14,13 +14,23 @@ DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
 
 PROMPT_TEMPLATE = """
-Answer the question based only on the following context:
+You are a knowledgeable assistant. Use the following retrieved context to answer the user question accurately and comprehensively.
 
+[BEGIN CONTEXT]
 {context}
+[END CONTEXT]
 
----
+Instructions:
+- Use only the information in the context to generate your answer.
+- If the context does not contain enough information, respond with: "The available context does not provide a sufficient answer."
+- Be concise, factual, and clear.
+- Avoid speculation or making up information.
 
-Answer the question based on the above context: {question}
+User Question:
+{question}
+
+Answer:
+
 """
 
 def query_rag(query_text: str):
@@ -39,7 +49,8 @@ def query_rag(query_text: str):
 
     ollama_host = os.getenv("OLLAMA_HOST", "localhost")
     print(f"http://{ollama_host}:11434")
-    model = OllamaLLM(model="qwen:0.5b", base_url=f"http://{ollama_host}:11434")
+    model = OllamaLLM(model="deepseek-r1:latest", base_url=f"http://{ollama_host}:11434")
+
     response_text = model.invoke(prompt)
 
     print(response_text)
@@ -84,7 +95,7 @@ async def add_documents(file: UploadFile = File(...)):
         
         # Add documents to Chroma
         embedding_service = EmbeddingService()
-        embedding_service.add_documents_to_chroma(documents)
+        embedding_service.add_document_to_chroma(documents)
         
         return {"message": "Documents added successfully"}
     except Exception as e:
