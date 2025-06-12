@@ -1,16 +1,28 @@
-FROM python:3.11-slim
+FROM python:3.10.8-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies and newer SQLite
 RUN apt-get update && apt-get install -y \
     build-essential \
     tesseract-ocr \
     libmagic1 \
     poppler-utils \
     libreoffice \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
+# Install newer SQLite
+RUN wget https://www.sqlite.org/2025/sqlite-autoconf-3500100.tar.gz \
+    && tar xvfz sqlite-autoconf-3500100.tar.gz \
+    && cd sqlite-autoconf-3500100 \
+    && ./configure \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf sqlite-autoconf-3500100*
+    
+ENV LD_LIBRARY_PATH="/usr/local/lib"
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -25,4 +37,4 @@ RUN mkdir -p data chroma
 EXPOSE 3038
 
 # Command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3038"] 
+CMD ["python", "main.py"] 

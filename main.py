@@ -39,7 +39,7 @@ def query_rag(query_text: str):
 
     ollama_host = os.getenv("OLLAMA_HOST", "localhost")
     print(f"http://{ollama_host}:11434")
-    model = OllamaLLM(model="mistral:7b", base_url=f"http://{ollama_host}:11434")
+    model = OllamaLLM(model="qwen:0.5b", base_url=f"http://{ollama_host}:11434")
     response_text = model.invoke(prompt)
 
     print(response_text)
@@ -94,4 +94,4 @@ async def add_documents(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=3038, reload=True) 
+    uvicorn.run("main:app", host="0.0.0.0", port=3038, reload=True) 
