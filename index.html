@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            white-space: pre-wrap;
+        }
+
+        .file-upload {
+            margin-bottom: 10px;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RAG System Interface</h1>
+
+        <div class="section">
+            <h2>Query Documents</h2>
+            <textarea id="queryInput" placeholder="Enter your question here..."></textarea>
+            <button onclick="submitQuery()">Submit Query</button>
+            <div id="queryResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>Add Documents</h2>
+            <div class="file-upload">
+                <input type="file" id="documentInput" accept=".txt,.pdf,.doc,.docx">
+            </div>
+            <button onclick="uploadDocument()">Upload Document</button>
+            <div id="uploadStatus" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://34.73.62.68:3038';
+
+        async function submitQuery() {
+            const queryInput = document.getElementById('queryInput');
+            const resultDiv = document.getElementById('queryResult');
+            const query = queryInput.value.trim();
+
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+
+            try {
+                resultDiv.textContent = 'Loading...';
+                const response = await fetch(`${API_BASE_URL}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                resultDiv.textContent = data.result;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function uploadDocument() {
+            const fileInput = document.getElementById('documentInput');
+            const statusDiv = document.getElementById('uploadStatus');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                statusDiv.textContent = 'Uploading...';
+                statusDiv.className = 'status';
+                
+                const response = await fetch(`${API_BASE_URL}/add-documents`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                statusDiv.textContent = data.message;
+                statusDiv.className = 'status success';
+                fileInput.value = ''; // Clear the file input
+            } catch (error) {
+                statusDiv.textContent = `Error: ${error.message}`;
+                statusDiv.className = 'status error';
+            }
+        }
+    </script>
+</body>
+</html> 

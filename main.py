@@ -8,6 +8,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_ollama import OllamaLLM
 import os
 from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create data directory if it doesn't exist
 DATA_DIR = Path("data")
@@ -58,6 +59,15 @@ def query_rag(query_text: str):
 
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 class QueryRequest(BaseModel):
     query: str
